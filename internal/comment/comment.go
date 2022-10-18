@@ -25,6 +25,8 @@ type Comment struct {
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
 	CreateComment(context.Context, Comment) (Comment, error)
+	UpdateComment(context.Context, Comment) (Comment, error)
+	DeleteComment(context.Context, string) error
 }
 
 // Service - is the struct on which all our
@@ -41,7 +43,7 @@ func NewService(store Store) *Service {
 }
 
 func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
-	fmt.Println("retrieving a comment")
+	fmt.Println("retrieving a comment, id:", id)
 
 	cmt, err := s.Store.GetComment(ctx, id)
 
@@ -52,17 +54,31 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 	return cmt, nil
 }
 
-func (s *Service) UpdateComment(ctx context.Context, cmt Comment) error {
-	return ErrNotImpemented
+func (s *Service) UpdateComment(ctx context.Context, cmt Comment) (Comment, error) {
+	fmt.Println("updating a comment, id:", cmt.ID)
+
+	cmt, err := s.Store.UpdateComment(ctx, cmt)
+
+	if err != nil {
+		return Comment{}, err
+	}
+	return cmt, nil
 }
 
 func (s *Service) DeleteComment(ctx context.Context, id string) error {
-	return ErrNotImpemented
+	fmt.Println("deleting a comment, id:", id)
+
+	err := s.Store.DeleteComment(ctx, id)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Service) CreateComment(ctx context.Context, cmt Comment) (Comment, error) {
-	fmt.Println("creating a comment")
-	
+	fmt.Println("creating a new comment")
+
 	insertedComment, err := s.Store.CreateComment(ctx, cmt)
 
 	if err != nil {

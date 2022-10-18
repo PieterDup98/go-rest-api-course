@@ -28,14 +28,30 @@ func Run() error {
 
 	//Feature logic
 	cmtService := comment.NewService(db)
-	cmt, _ := cmtService.CreateComment(context.Background(), comment.Comment{
+
+	cmtCreate, errCreate := cmtService.CreateComment(context.Background(), comment.Comment{
 		Slug:   "manual-test",
 		Body:   "Hello World",
 		Author: "Pieter",
 	})
-	fmt.Println("inserted:", cmt)
+	if errCreate == nil {
+		fmt.Println("inserted:", cmtCreate)
+	}
 
-	fmt.Println(cmtService.GetComment(context.Background(), "28e7a8d7-3aee-4451-afba-4d04176b6f9b"))
+	cmtCreate.Author = "John Wayne"
+	cmtUpdate, errUpdate := cmtService.UpdateComment(context.Background(), cmtCreate)
+	if errUpdate == nil {
+		fmt.Println("updated:", cmtUpdate)
+	}
+
+	var staticUUId string = "28e7a8d7-3aee-4451-afba-4d04176b6f9b"
+	cmtGet, errGet := cmtService.GetComment(context.Background(), staticUUId)
+	if errGet == nil {
+		fmt.Println("fetched:", cmtGet)
+		cmtService.DeleteComment(context.Background(), staticUUId)
+	} else {
+		fmt.Println("couldn't fetch " + staticUUId + " skipping delete")
+	}
 
 	return nil
 }
