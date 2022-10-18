@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/PieterDup98/go-rest-api-course/internal/comment"
+	uuid "github.com/satori/go.uuid"
 )
 
 type CommentRow struct {
@@ -40,4 +41,32 @@ func (d *Database) GetComment(ctx context.Context, uuid string) (comment.Comment
 	}
 
 	return convertCommentRowToComment(cmtRow), nil
+}
+
+func (d *Database) CreateComment(ctx context.Context, newComment comment.Comment) (comment.Comment, error) {
+	newComment.ID = uuid.NewV4().String()
+
+	postRow := CommentRow{
+		ID:     newComment.ID,
+		Slug:   sql.NullString{String: newComment.Slug, Valid: true},
+		Body:   sql.NullString{String: newComment.Body, Valid: true},
+		Author: sql.NullString{String: newComment.Author, Valid: true},
+	}
+
+	row, err := d.Client.NamedQueryContext(
+		ctx,
+		`INSERT INTO comments
+		(id, slug, body, author)
+		VALUES (:id, :slug, :body, :author)`,
+		postRow,
+	)
+
+	if err != nil {
+		return comment.Comment{}, fmt.Errorf("failed to insert a comment: %w", err)
+	}
+	if err := row.Close(); err != nil {
+		return comment.Comment{}, fmt.Errorf("failed to close rows: %w", err)
+	}
+
+	return newComment, nil
 }

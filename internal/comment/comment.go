@@ -24,6 +24,7 @@ type Comment struct {
 // that our service needs to operate
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
+	CreateComment(context.Context, Comment) (Comment, error)
 }
 
 // Service - is the struct on which all our
@@ -60,5 +61,12 @@ func (s *Service) DeleteComment(ctx context.Context, id string) error {
 }
 
 func (s *Service) CreateComment(ctx context.Context, cmt Comment) (Comment, error) {
-	return Comment{}, ErrNotImpemented
+	fmt.Println("creating a comment")
+	
+	insertedComment, err := s.Store.CreateComment(ctx, cmt)
+
+	if err != nil {
+		return Comment{}, err
+	}
+	return insertedComment, nil
 }

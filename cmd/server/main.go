@@ -24,11 +24,19 @@ func Run() error {
 		fmt.Println("failed to migrate database")
 		return err
 	}
+	fmt.Println("successfully connected pinged and migrated the database")
 
+	//Feature logic
 	cmtService := comment.NewService(db)
+	cmt, _ := cmtService.CreateComment(context.Background(), comment.Comment{
+		Slug:   "manual-test",
+		Body:   "Hello World",
+		Author: "Pieter",
+	})
+	fmt.Println("inserted:", cmt)
+
 	fmt.Println(cmtService.GetComment(context.Background(), "28e7a8d7-3aee-4451-afba-4d04176b6f9b"))
 
-	fmt.Println("successfully connected pinged and migrated the database")
 	return nil
 }
 
